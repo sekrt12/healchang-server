@@ -8,7 +8,7 @@ cd healchang-server
 ### Run
 <pre>
 # Login For Private Docker Repository
-docker login
-docker pull sekrt12/healchang-server
+<!-- docker login
+docker pull sekrt12/healchang-server -->
 docker run -p 3001:3001 sekrt12/healchang-server
 </pre>

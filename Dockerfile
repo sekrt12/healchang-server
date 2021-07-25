@@ -1,10 +1,21 @@
-FROM ubuntu:18.04
+FROM node:14-alpine
 LABEL name="Taeeung"
 LABEL email="xodmd45@gmail.com"
 
-RUN apt-get update
-RUN apt-get install -y apache2
+RUN mkdir -p /app
+WORKDIR /app
 
-EXPOSE 80
+COPY package*.json ./
+# ADD . /app
+RUN npm install
 
-CMD
+RUN npm install -g pm2 
+
+# COPY . ./
+ADD ./ /app
+
+EXPOSE 3001
+
+# RUN npm run build
+
+CMD ["pm2-runtime", "start", "app.js", "--watch"]

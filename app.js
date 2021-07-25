@@ -43,17 +43,27 @@ io.on('connection', function (socket) {
     });
 });
 
+function check_player(socket){
+    if (userrooms[socket.room]!=undefined &&'players' in userrooms[socket.room] && socket.id in userrooms[socket.room].players)
+        return;
+    socket.disconnect();
+}
+
 function onReady(socket) {
     socket.on('Ready', function (data) {
+        check_player(socket);
         userrooms[socket.room].players[socket.id] = !userrooms[socket.room].players[socket.id];
         io.sockets.in(socket.room).emit('Ready', [socket.id, userrooms[socket.room].players[socket.id]]);
-        if (Object.keys(userrooms[socket.room].players).length == 2 && Object.values(userrooms[socket.room].players).every(x => x))
+        syncroompeople(socket.room);
+        if (Object.keys(userrooms[socket.room].players).length == 2 && Object.values(userrooms[socket.room].players).every(x => x)){
             startGame(socket.room)
+        }
     });
 }
 
 function onFail(socket) {
     socket.on('Fail', function (_) {
+        check_player(socket);
         if (userrooms[socket.room].state == gamestate.Turn && userrooms[socket.room].turnid == socket.id)
             fail(socket.room, socket.id);
     });
@@ -62,6 +72,7 @@ function onFail(socket) {
 function onSuccess(socket) {
     socket.on('Success', function (data) {
         const roomName = socket.room;
+        check_player(socket);
         if (userrooms[roomName].state != gamestate.Turn || userrooms[roomName].turnid != socket.id)
             return;
         const preturnid = userrooms[roomName].turnid;
@@ -97,8 +108,8 @@ function onJoinRoom(socket) {
             socket.disconnect();
             roomout(socket);
         }
-        syncroompeople(roomName);
         if (roomexist) {
+            syncroompeople(roomName);
             socket.leave(socket.room);
             socket.join(roomName);
             socket.room = roomName;
@@ -212,12 +223,12 @@ function initGame(socket, _difficulty, _bodyparts) {
 
 const playtime = 60000;
 function startGame(roomName) {
-    syncroompeople(roomName);
     userrooms[roomName].state = gamestate.Start;
     io.in(roomName).emit('Start');
     setTimeout(() => {
         if (userrooms[roomName] == undefined || Object.keys(userrooms[roomName].players).length < 2) return;
         userrooms[roomName].randpart();
+        userrooms[roomName].turnid = Object.keys(userrooms[roomName].players)[0]
         for (const key in userrooms[roomName].players)
             userrooms[roomName].players[key] = false;
         userrooms[roomName].timeout = gameTimeout(roomName);
