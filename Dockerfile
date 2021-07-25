@@ -7,7 +7,7 @@ WORKDIR /app
 
 COPY package*.json ./
 # ADD . /app
-RUN npm install
+RUN npm install -f
 
 RUN npm install -g pm2 
 
