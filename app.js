@@ -196,7 +196,7 @@ function roomout(socket) {
     }
 }
 
-Bodyparts = [4, 4, 3, 4]// {upper:4,lower:4,whole:3,core:4}
+Bodyparts = [3, 4, 4, 4]// {upper:4,lower:4,whole:3,core:4}
 
 function initGame(socket, _difficulty, _bodyparts) {
     _players = {};
